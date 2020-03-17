@@ -154,6 +154,8 @@ class MODELL(helpful):
         train_summary_writer = tf.summary.create_file_writer(train_log_dir)
         test_summary_writer = tf.summary.create_file_writer(test_log_dir)
         self.hist = list()
+        self.test_loss = list()
+
         for epoch in range(self.epochz):
             start = time.time()
 
@@ -162,13 +164,14 @@ class MODELL(helpful):
             with train_summary_writer.as_default():
                 tf.summary.scalar('loss_metric', self.loss_metric.result(), step=epoch)
             if epoch%50 == 0:
-                __, predz, ___  = self.model_test_out()
+                __, predz, lloss  = self.model_test_out()
                 if self.firsttime:
                     self.firsttime = False
                     self.checkpoints['testout'] = __
                 key_name =  str(epoch) + '_epochs'
                 self.checkpoints[key_name] = predz
-            
+                self.test_loss.append(lloss.numpy())
+
             template = 'Sec : {} \n Epoch {} ---- Loss: {}  ----  Val_Loss: {}'
             tf.print('Epoch', epoch, ': Time', time.time()-start, ': loss', self.loss_metric.result())
             self.hist.append(self.loss_metric.result())
@@ -300,7 +303,7 @@ def exp_eval(dicz):
     mm.epochz = 1301
     mm.trainingz()
     keylist = list(mm.checkpoints.keys())
-    dirr = '/artifacts/' + str(mm.filter1) + '-' + str(mm.kernel1) +'-' + str(mm.filter2) +'-' + str(mm.kernel2) + '-' + str(lrate)[:7]
+    dirr =  '/artifacts/' + str(mm.filter1) + '-' + str(mm.kernel1) +'-' + str(mm.filter2) +'-' + str(mm.kernel2) + '-' + str(lrate)[:7]
     os.mkdir(dirr)
 
     for key in keylist:
@@ -310,14 +313,14 @@ def exp_eval(dicz):
     __, predz, losz  = mm.model_test_out()
     last = dirr +  '/' + 'last'
     histz = dirr +  '/' + 'hist'
-
+    testloss = dirr + '/' + 'testloss'
     np.save(last, predz)
     np.save(histz,np.array(mm.hist))
-    print('HELLOOOOOO')
-
+    np.save(testloss,np.array(mm.test_loss))
+    loszz = np.min(np.array(mm.test_loss))
     del mm
     return {
-        'loss': losz,
+        'loss': loszz,
         'status': STATUS_OK,
         'attachments':
             {'time_module': pickle.dumps(time.time)}
@@ -328,6 +331,6 @@ best = fmin(exp_eval,
             space=spacez,
             algo=tpe.suggest,
             trials=trials,
-            max_evals=3)
+            max_evals=250)
 
 best
