@@ -8,4 +8,5 @@ pip install pandas
 pip install keras
 pip install xlrd
 pip install hyperopt
+pip install statsmodels
 python tune1.py
