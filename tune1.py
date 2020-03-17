@@ -297,22 +297,22 @@ def exp_eval(dicz):
     mm.model_parallel_copy()
     mm.optimizer = tf.keras.optimizers.Adam(learning_rate=lrate)
     mm.windowbatch(train_input,train_out,test_input,test_out)
-    mm.epochz = 1001
+    mm.epochz = 100
     mm.trainingz()
     keylist = list(mm.checkpoints.keys())
-    dirr = '/artifacts/' + str(mm.filter1) + '-' + str(mm.kernel1) +'-' + str(mm.filter2) +'-' + str(mm.kernel2) + '-' + str(lrate)[:7] +  '/'
+    dirr = '/artifacts/' + str(mm.filter1) + '-' + str(mm.kernel1) +'-' + str(mm.filter2) +'-' + str(mm.kernel2) + '-' + str(lrate)[:7]
     os.mkdir(dirr)
 
     for key in keylist:
-        key_ = dirr + key
+        key_ = dirr +  '/' + key
         print(key_)
         np.save(key_,mm.checkpoints[key])
     __, predz, losz  = mm.model_test_out()
-    last = dirr + 'last'
-    hist = dirr + 'hist'
+    last = dirr +  '/' + 'last'
+    histz = dirr +  '/' + 'hist'
 
     np.save(last, predz)
-    np.save(hist,np.array(mm.hist))
+    np.save(histz,np.array(mm.hist))
     print('HELLOOOOOO')
 
     del mm
@@ -328,6 +328,6 @@ best = fmin(exp_eval,
             space=spacez,
             algo=tpe.suggest,
             trials=trials,
-            max_evals=300)
+            max_evals=3)
 
 best
