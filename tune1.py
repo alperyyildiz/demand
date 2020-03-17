@@ -328,6 +328,6 @@ best = fmin(exp_eval,
             space=spacez,
             algo=tpe.suggest,
             trials=trials,
-            max_evals=150)
+            max_evals=3)
 
 best
