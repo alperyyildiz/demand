@@ -280,8 +280,7 @@ spacez=hp.choice('a',[
     'filter1' : hp.uniform('filter1', 32,256),
     'filter2' : hp.uniform('filter2', 16,128),
     'kernel1' : hp.uniform('kernel1', 4,16),
-    'kernel2' : hp.uniform('kernel2', 2,8),
-    'lr' : hp.uniform('lr', 0.001,0.00005)
+    'kernel2' : hp.uniform('kernel2', 2,8)
       }])
 
 
@@ -293,17 +292,16 @@ def exp_eval(dicz):
     mm.filter2 = int(np.floor(dicz['filter2']))
     mm.kernel1 = int(np.floor(dicz['kernel1']))
     mm.kernel2 = int(np.floor(dicz['kernel2']))
-    lrate = dicz['lr']
-    print('f1 to 2 {}  {} kernel1 to 2 {}   {}  lr is {} \n'.format(mm.filter1,mm.filter2,mm.kernel1,mm.kernel2,lrate))
+    print('f1 to 2 {}  {} kernel1 to 2 {}   {}  lr is {} \n'.format(mm.filter1,mm.filter2,mm.kernel1,mm.kernel2))
 
     train_input, test_input, train_out, test_out = mm.preprocess(period=24,windowlength=24,split = 200)
     mm.model_parallel_copy()
-    mm.optimizer = tf.keras.optimizers.Adam(learning_rate=lrate)
+    mm.optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
     mm.windowbatch(train_input,train_out,test_input,test_out)
-    mm.epochz = 1301
+    mm.epochz = 501
     mm.trainingz()
     keylist = list(mm.checkpoints.keys())
-    dirr =  '/artifacts/' + str(mm.filter1) + '-' + str(mm.kernel1) +'-' + str(mm.filter2) +'-' + str(mm.kernel2) + '-' + str(lrate)[:7]
+    dirr =  '/artifacts/' + str(mm.filter1) + '-' + str(mm.kernel1) +'-' + str(mm.filter2) +'-' + str(mm.kernel2)
     os.mkdir(dirr)
 
     for key in keylist:
@@ -331,6 +329,6 @@ best = fmin(exp_eval,
             space=spacez,
             algo=tpe.suggest,
             trials=trials,
-            max_evals=250)
+            max_evals=100)
 
 best
