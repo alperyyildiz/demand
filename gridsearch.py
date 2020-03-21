@@ -90,6 +90,7 @@ class MODELL(helpful):
         self.valid_data = None
         self.test_data = None
         self.epochz = None
+        self.d_out = 0.4
         self.df = df
         self.initz = tf.keras.initializers.glorot_uniform(seed=None)
         self.loss_mse = tf.keras.losses.MeanAbsoluteError()
