@@ -195,9 +195,9 @@ class MODELL(helpful):
         #x1 = tf.keras.layers.LeakyReLU(alpha=0.2)(x1)
         #x1 = tf.keras.layers.Dropout(0.2)(x1)
         x1 = tf.keras.layers.Flatten()(x1)
-        x1 = tf.keras.layers.Dense(128)(x1)
-        x1 = tf.keras.layers.LeakyReLU(alpha=0.3)(x1)
-        x1 = tf.keras.layers.Dropout(0.25)(x1)
+        #x1 = tf.keras.layers.Dense(128)(x1)
+        #x1 = tf.keras.layers.LeakyReLU(alpha=0.3)(x1)
+        #x1 = tf.keras.layers.Dropout(0.25)(x1)
 
         x1 = tf.keras.layers.Dense(32)(x1)
         x1 = tf.keras.layers.LeakyReLU(alpha=0.3)(x1)
@@ -277,9 +277,9 @@ class MODELL(helpful):
 
 spacez=hp.choice('a',[
       {  
-    'filter1' : hp.uniform('filter1', 32,256),
-    'filter2' : hp.uniform('filter2', 16,128),
-    'kernel1' : hp.uniform('kernel1', 4,16),
+    'filter1' : hp.uniform('filter1', 12,128),
+    'filter2' : hp.uniform('filter2', 8,128),
+    'kernel1' : hp.uniform('kernel1', 2,9),
     'kernel2' : hp.uniform('kernel2', 2,8)
       }])
 
@@ -329,6 +329,6 @@ best = fmin(exp_eval,
             space=spacez,
             algo=tpe.suggest,
             trials=trials,
-            max_evals=100)
+            max_evals=250)
 
 best
