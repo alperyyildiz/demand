@@ -342,6 +342,7 @@ for fsize in f1:
                     mm.kernel2 = kern2
                     mm.dense1 = fsize_d
                     mm.windowlength=24
+                    mm.BN = True
                     print('f1: {} ---- f2: {}   d: {}   k1:  {}  k2: {}'.format(fsize,fsize_2,fsize_d,kern1,kern2))   
                     train_input, test_input, train_out, test_out = mm.preprocess(period=24,windowlength=mm.windowlength,split = 200)
                     mm.model_parallel_copy()
