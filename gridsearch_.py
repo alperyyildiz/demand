@@ -311,13 +311,13 @@ class MODELL(helpful):
 
 
 
-f1 = [72,96,112,128]
-f2 = [16,32,48,64,72,96,128]
-d1 = [16,32,48,64,72,96,128]
-k1 = [6,8,10,12,16]
-k2 = [2,3,4,6,8]
+f1 = [64,96,128]
+f2 = [16,32,64]
+d1 = [32,64,96]
+k1 = [4,6,8]
+k2 = [3,4,8]
 
-batch = [16,32,48]
+batch = 32
 d_out = 0.4
 BN = [False,True]
 lrate = 0.0007
@@ -326,60 +326,59 @@ lrate = 0.0007
 for fsize in f1:
     for fsize_2 in f2:
         for fsize_d in d1:
-            for bsize in batch:
-                for boo in BN:
-                    for kern1 in k1:
-                        for kern2 in k2:
-                            try:    
-                                del mm
-                            except: 
-                                pass
+            for boo in BN:
+                for kern1 in k1:
+                    for kern2 in k2:
+                        try:    
+                            del mm
+                        except: 
+                            pass
 
-                            mm = MODELL()
-                            mm.outsize = 3
+                        mm = MODELL()
+                        mm.outsize = 3
 
-                            mm.filter1 = fsize
-                            mm.filter2 = fsize_2
-                            mm.BN = boo
-                            mm.kernel1 = kern1
-                            mm.kernel2 = kern2
-                            mm.dense1 = fsize_d
-                            mm.windowlength=24
-                            mm.batch = bsize
-                            mm.d_out = dout
+                        mm.filter1 = fsize
+                        mm.filter2 = fsize_2
+                        mm.BN = boo
+                        mm.kernel1 = kern1
+                        mm.kernel2 = kern2
+                        mm.dense1 = fsize_d
+                        mm.windowlength=24
+                        mm.batch = bsize
+                        mm.d_out = dout
 
-                            print('f1 f2 --> {}  {} dense: {} ---  k1 - k2 --> {} - {} \n  batch: {} d.out: {}  lrate: {}   BN : {} \n '.format(mm.filter1,mm.filter2,mm.dense1,mm.kernel1,mm.kernel2,mm.batch,mm.d_out,lrate,mm.BN))
-                            train_input, test_input, train_out, test_out = mm.preprocess(period=24,windowlength=mm.windowlength,split = 200)
-                            mm.model_parallel_copy()
-                            mm.optimizer = tf.keras.optimizers.Adam(learning_rate=lrate)
-                            mm.windowbatch(train_input,train_out,test_input,test_out)
-                            mm.valid_data = mm.test_data
-                            mm.epochz = 1501
-                            mm.trainingz()
-                            key = 'f1: ' + str(mm.filter1) +  '  f2: ' + str(mm.filter2) + '  dense:' + str(mm.dense1) + '  \n  k1: ' + str(mm.kernel1)  
-                            key = key + 'k2: ' + str(mm.kernel2) + '\n batch: ' + str(mm.batch) + '  lrate: ' + str(lrate) + 'd.out: ' +str(mm.d_out) +  '  BN: ' +str(mm.BN)
-                            fig =plt.figure(figsize=(12,6))
-                            fig.suptitle(key)
-                            plt.plot(mm.hist)
-                            plt.plot(mm.hist_valid)
-                            plt.plot(np.full(shape=(np.array(mm.hist).shape[0]),fill_value=0.3),'--r')
-                            plt.ylim((0.1,0.5))
+                        print('f1 f2 --> {}  {} dense: {} ---  k1 - k2 --> {} - {} \n  batch: {} d.out: {}  lrate: {}   BN : {} \n '.format(mm.filter1,mm.filter2,mm.dense1,mm.kernel1,mm.kernel2,mm.batch,mm.d_out,lrate,mm.BN))
+                        train_input, test_input, train_out, test_out = mm.preprocess(period=24,windowlength=mm.windowlength,split = 200)
+                        mm.model_parallel_copy()
+                        mm.optimizer = tf.keras.optimizers.Adam(learning_rate=lrate)
+                        mm.windowbatch(train_input,train_out,test_input,test_out)
+                        mm.valid_data = mm.test_data
+                        mm.epochz = 1501
+                        mm.trainingz()
+                        key = 'f1: ' + str(mm.filter1) +  '  f2: ' + str(mm.filter2) + '  dense:' + str(mm.dense1) + '  \n  k1: ' + str(mm.kernel1)  
+                        key = key + 'k2: ' + str(mm.kernel2) + '\n batch: ' + str(mm.batch) + '  lrate: ' + str(lrate) + 'd.out: ' +str(mm.d_out) +  '  BN: ' +str(mm.BN)
+                        fig =plt.figure(figsize=(12,6))
+                        fig.suptitle(key)
+                        plt.plot(mm.hist)
+                        plt.plot(mm.hist_valid)
+                        plt.plot(np.full(shape=(np.array(mm.hist).shape[0]),fill_value=0.3),'--r')
+                        plt.ylim((0.1,0.5))
 
-                            key = str(mm.filter1) + '_' +  str(mm.filter2) + '_' + str(mm.dense1)+ '_' + str(mm.kernel1)+ '_' + str(mm.kernel2)+ '_' + str(mm.batch)+ '_' + str(lrate)+ '_' + str(mm.d_out)+ '_' + str(mm.BN)
+                        key = str(mm.filter1) + '_' +  str(mm.filter2) + '_' + str(mm.dense1)+ '_' + str(mm.kernel1)+ '_' + str(mm.kernel2)+ '_' + str(mm.batch)+ '_' + str(lrate)+ '_' + str(mm.d_out)+ '_' + str(mm.BN)
 
-                            dirr =  '/artifacts/' + key + '.png'
-                            plt.savefig(dirr)
+                        dirr =  '/artifacts/' + key + '.png'
+                        plt.savefig(dirr)
 
 
-                            plt.clf()
+                        plt.clf()
 
-                            fig = mm.plotz('1500_epochs')
+                        fig = mm.plotz('1500_epochs')
 
-                            dirr =  '/artifacts/preds_' +  key + '.png'
+                        dirr =  '/artifacts/preds_' +  key + '.png'
 
-                            plt.savefig(dirr)
+                        plt.savefig(dirr)
 
-                            del fig
+                        del fig
 
 
 
