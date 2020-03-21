@@ -415,7 +415,7 @@ def exp_eval(dicz):
 
     dirr =  '/artifacts/' + key 
     os.mkdir(dirr)
-    key = '3-dense_' 
+    try:
         os.chdir('Conv1D - 1 layer - plots/')
         plt.savefig(key)
     except:
