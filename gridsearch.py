@@ -328,10 +328,11 @@ for fsize in f1:
                              for kern1 in k1:
                                     for kern2 in k2:
                                         
-                                        os.chdir(os.path.expanduser("~"))
-                                        os.chdir('/notebooks')
                                         try:    
                                             del mm
+                                        except: 
+                                            pass
+        
                                         mm = MODELL()
                                         mm.outsize = 3
 
