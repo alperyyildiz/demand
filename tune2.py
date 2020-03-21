@@ -339,7 +339,7 @@ def exp_eval(dicz):
     mm.epochz = 2001
     mm.trainingz()
     key = 'f1: ' + str(mm.filter1) +  'f2: ' + str(mm.filter2) + '  \n  k1: ' + str(mm.kernel1)  
-    key = key + 'k2: ' + str(mm.kernel2) + '\n batchsize: ' + str(batchsize)+ 'lrate: ' + str(lrate) + '\n 3-dense'
+    key = key + 'k2: ' + str(mm.kernel2) + '\n batchsize: ' + str(batchsize)+ 'lrate: ' + str(lrate) + '\n 3-dense-96-44-'
     fig =plt.figure(figsize=(12,6))
     fig.suptitle(key)
     plt.plot(mm.hist)
@@ -347,15 +347,7 @@ def exp_eval(dicz):
     plt.plot(np.full(shape=(np.array(mm.hist).shape[0]),fill_value=0.3),'--r')
     plt.ylim((0.1,0.5))
     
-
-    train_input, test_input, train_out, test_out = mm.preprocess(period=24,windowlength=24,split = 200)
-    mm.model_parallel_copy()
-    mm.optimizer = tf.keras.optimizers.Adam(learning_rate=0.001)
-    mm.windowbatch(train_input,train_out,test_input,test_out)
-    mm.epochz = 501
-    mm.trainingz()
     keylist = list(mm.checkpoints.keys())
-    key = str(mm.filter1) + '-' + str(mm.kernel1) +'-' + str(mm.filter2) +'-' + str(mm.kernel2) + str(mm.filter1) + '_' + str(mm.kernel1) + '_' + str(mm.filter2) + '_' + str(mm.kernel2) + '_' + str(lrate) + 'batchsize: ' + str(batchsize) + '.png'
 
     dirr =  '/artifacts/' + key 
     try:
