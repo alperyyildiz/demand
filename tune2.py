@@ -357,7 +357,8 @@ def exp_eval(dicz):
 
     fig = mm.plotz('2000_epochs')
 
-        
+    dirr =  '/artifacts/preds_' +  key + '.png'
+
     plt.savefig(dirr)
     
     real, testpred, lossz = mm.model_test_out()
