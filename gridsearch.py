@@ -321,10 +321,9 @@ learn = 0.0007
 for fsize in f1:
     for fsize_2 in f2:
         for fsize_d in d1:
-            for bsize in batch:
-                for boo in BN:
-                    for kern1 in k1:
-                        for kern2 in k2:
+            for kern1 in k1:
+                    for kern2 in k2:
+                        for bsize in batch:
                             try:    
                                 del mm
                             except: 
@@ -335,13 +334,11 @@ for fsize in f1:
 
                             mm.filter1 = fsize
                             mm.filter2 = fsize_2
-                            mm.BN = boo
                             mm.kernel1 = kern1
                             mm.kernel2 = kern2
                             mm.dense1 = fsize_d
                             mm.windowlength=24
                             mm.batch = bsize
-                            mm.d_out = dout
 
                             print('f1: {} ---- f2: {}   d: {}   k1:  {}  k2: {}'.format(fsize,fsize_2,fsize_d,kern1,kern2))   
                             train_input, test_input, train_out, test_out = mm.preprocess(period=24,windowlength=mm.windowlength,split = 200)
