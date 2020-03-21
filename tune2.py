@@ -349,12 +349,8 @@ def exp_eval(dicz):
     
     keylist = list(mm.checkpoints.keys())
 
-    dirr =  '/artifacts/' + key 
-    try:
-        os.chdir('Conv1D - 1 layer - plots/')
-        plt.savefig(dirr)
-    except:
-        plt.savefig(dirr)
+    dirr =  '/artifacts/' + key + '.png'
+    plt.savefig(dirr)
 
         
     plt.clf()
@@ -362,11 +358,8 @@ def exp_eval(dicz):
     fig = mm.plotz('2000_epochs')
 
         
-    try:
-        os.chdir('Conv1D - 1 layer - plots/')
-        plt.savefig('/artifacts/pred_' + key )
-    except:
-        plt.savefig('/artifacts/pred_' + key )
+    plt.savefig(dirr)
+    
     real, testpred, lossz = mm.model_test_out()
     del mm
     return {
