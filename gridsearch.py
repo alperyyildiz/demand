@@ -156,7 +156,7 @@ class MODELL(helpful):
 
     def trainingz(self):
         current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
-        train_log_dir = '/logs/gradient_tape/' + current_time + '/train'
+        train_log_dir = 'A/logs/gradient_tape/' + current_time + '/train'
         valid_log_dir = '/logs/gradient_tape/' + current_time + '/valid'
         test_log_dir = '/logs/gradient_tape/' + current_time + '/test'
         train_summary_writer = tf.summary.create_file_writer(train_log_dir)
@@ -304,16 +304,17 @@ class MODELL(helpful):
 
         return fig
 
-f1 = [8*x + 8 for x in range(1,15)]
-f2 = [8*x + 8 for x in range(1,15)]
-d1 = [8*x + 8 for x in range(1,15)]
-k1 = [2 + x*2 for x in range(8)]
-k2 = [2 + x*2 for x in range(4)]
+    
+f1 = [16,24,32,42,48,64]
+f2 = [16,24,32,42,48,64,72,96,112,128]
+d1 = [16,24,32,42,48,64,72,96,112,128]
+k1 = [2,3,4,6,8,10,11,12,13,16]
+k2 = [2,3,4,6,8]
 
-batch = [4,6,8,12,16,20,24,28,32,36]
-d_out = [0.5,0.4,0.3,0.2]
+batch = [4,8,12,16,24,28,32,48]
+d_out = 0.4
 BN = [False,True]
-learn = [0.0003,0.0008,0.001,0.002,0.003,0.005, 0.01] 
+learn = 0.0007
 
 
 for fsize in f1:
@@ -350,7 +351,7 @@ for fsize in f1:
                                         mm.optimizer = tf.keras.optimizers.Adam(learning_rate=lrate)
                                         mm.windowbatch(train_input,train_out,test_input,test_out)
                                         mm.valid_data = mm.test_data
-                                        mm.epochz = 501
+                                        mm.epochz = 1501
                                         mm.trainingz()
                                         key = 'f1: ' + str(mm.filter1) +  '  f2: ' + str(mm.filter2) + '  dense:' + str(mm.dense1) + '  \n  k1: ' + str(mm.kernel1)  
                                         key = key + 'k2: ' + str(mm.kernel2) + '\n batch: ' + str(mm.batch) + '  lrate: ' + str(lrate) + 'd.out: ' +str(mm.d_out) +  '  BN: ' +str(mm.BN)
@@ -369,7 +370,7 @@ for fsize in f1:
 
                                         plt.clf()
 
-                                        fig = mm.plotz('500_epochs')
+                                        fig = mm.plotz('1500_epochs')
 
                                         dirr =  '/artifacts/preds_' +  key + '.png'
 
