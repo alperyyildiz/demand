@@ -310,24 +310,22 @@ class MODELL(helpful):
 
 
 f1 = [72,96,112,128]
-f2 = [16,24,32,42,48,64,72,96,112,128]
-d1 = [16,24,32,42,48,64,72,96,112,128]
-k1 = [2,3,4,6,8,10,11,12,13,16]
+f2 = [16,24,32,48,64,72,96,128]
+d1 = [16,24,32,48,64,72,96,128]
+k1 = [6,8,10,12,16]
 k2 = [2,3,4,6,8]
 
-batch = [4,8,12,16,24,28,32,48]
+batch = [16,32,48]
 d_out = 0.4
 BN = [False,True]
-learn = 0.0007
+lrate = 0.0007
 
 
 for fsize in f1:
     for fsize_2 in f2:
         for fsize_d in d1:
             for bsize in batch:
-                for lrate in learn:
                     for boo in BN:
-                        for dout in d_out:
                              for kern1 in k1:
                                     for kern2 in k2:
                                         
