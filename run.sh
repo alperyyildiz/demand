@@ -9,4 +9,4 @@ pip install keras
 pip install xlrd
 pip install hyperopt
 pip install statsmodels
-python tune1.py
+python tune2.py
