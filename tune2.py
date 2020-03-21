@@ -363,10 +363,10 @@ def exp_eval(dicz):
 
     plt.savefig(dirr)
     
-    real, testpred, lossz = mm.model_test_out()
+    real, testpred, LOSS = mm.model_test_out()
     del mm
     return {
-        'loss': loszz,
+        'loss': LOSS,
         'status': STATUS_OK,
         'attachments':
             {'time_module': pickle.dumps(time.time)}
