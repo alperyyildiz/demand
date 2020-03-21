@@ -291,7 +291,9 @@ class MODELL(helpful):
         pred = self.checkpoints[keyz]
         fig = plt.figure(figsize=(12, 6))
         ax1, ax2,  = fig.subplots(2, 1, )
-        
+        ax1.ylim((0,6000))
+        ax2.ylim((0,17000))
+
         bisi = self.test_actual.shape[0]
         for i in range(int(bisi/2)):
             ax1.plot(timez[i],pred[i])
