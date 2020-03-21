@@ -24,6 +24,7 @@ from hyperopt import fmin, tpe, hp, STATUS_OK, base,Trials
 import pickle
 
 
+print(os.listdir())
 
 os.chdir('/paperspace')
 print(os.getcwd())
