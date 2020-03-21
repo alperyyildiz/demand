@@ -308,7 +308,7 @@ f1 = [8*x + 8 for x in range(1,15)]
 f2 = [8*x + 8 for x in range(1,15)]
 d1 = [8*x + 8 for x in range(1,15)]
 k1 = [2 + x*2 for x in range(8)]
-k1 = [2 + x*2 for x in range(4)]
+k2 = [2 + x*2 for x in range(4)]
 
 batch = [4,6,8,12,16,20,24,28,32,36]
 d_out = [0.5,0.4,0.3,0.2]
