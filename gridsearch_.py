@@ -91,6 +91,7 @@ class MODELL(helpful):
         self.test_data = None
         self.epochz = None
         self.df = df
+        self.d_out = 0.4
         self.initz = tf.keras.initializers.glorot_uniform(seed=None)
         self.loss_mse = tf.keras.losses.MeanAbsoluteError()
         self.transformerr = None
@@ -318,8 +319,6 @@ k1 = [4,6,8]
 k2 = [3,4,8]
 
 batch = 32
-d_out = 0.4
-BN = True
 lrate = 0.0007
 
 
@@ -341,6 +340,7 @@ for fsize in f1:
                     mm.kernel1 = kern1
                     mm.kernel2 = kern2
                     mm.dense1 = fsize_d
+                    mm.batch = batch
                     mm.windowlength=24
                     mm.BN = True
                     print('f1: {} ---- f2: {}   d: {}   k1:  {}  k2: {}'.format(fsize,fsize_2,fsize_d,kern1,kern2))   
