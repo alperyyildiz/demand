@@ -22,9 +22,9 @@ from statsmodels.tsa.statespace import kalman_filter
 from sklearn.preprocessing import StandardScaler
 from hyperopt import fmin, tpe, hp, STATUS_OK, base,Trials
 import pickle
-os.chdir(os.path.expanduser("~"))
-os.chdir('/notebooks')
 
+
+print(os.getcwd())
 tf.keras.backend.set_floatx('float64')
 df = pd.read_excel('abc.xlsx').fillna(method='ffill')
 print('HELLOOOOOO')
