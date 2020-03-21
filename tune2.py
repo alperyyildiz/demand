@@ -212,18 +212,18 @@ class MODELL(helpful):
         x1 = tf.keras.layers.BatchNormalization()(x1)        
         x1 = tf.keras.layers.LeakyReLU(alpha=0.2)(x1)
         x1 = tf.keras.layers.Dropout(0.42)(x1)
-        x1 = tf.keras.layers.Conv1D(self.filter3,kernel_initializer=self.initz,activity_regularizer=regularizer,kernel_size=self.kernel3)(x1)
-        x1 = tf.keras.layers.LeakyReLU(alpha=0.2)(x1)
-        x1 = tf.keras.layers.BatchNormalization()(x1)
-        x1 = tf.keras.layers.Dropout(0.42)(x1)
+        #x1 = tf.keras.layers.Conv1D(self.filter3,kernel_initializer=self.initz,activity_regularizer=regularizer,kernel_size=self.kernel3)(x1)
+        #x1 = tf.keras.layers.LeakyReLU(alpha=0.2)(x1)
+        #x1 = tf.keras.layers.BatchNormalization()(x1)
+        #x1 = tf.keras.layers.Dropout(0.42)(x1)
 
         #x1 = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(48, return_sequences=True))(x1)
         #x1 = tf.keras.layers.LeakyReLU(alpha=0.18)(x1)
         #x1 = tf.keras.layers.Dropout(0.2)(x1)
         x1 = tf.keras.layers.Flatten()(x1)
-        x1 = tf.keras.layers.Dense(96)(x1)
-        x1 = tf.keras.layers.LeakyReLU(alpha=0.2)(x1)
-        x1 = tf.keras.layers.Dropout(0.4)(x1)
+        #x1 = tf.keras.layers.Dense(96)(x1)
+        #x1 = tf.keras.layers.LeakyReLU(alpha=0.2)(x1)
+        #x1 = tf.keras.layers.Dropout(0.4)(x1)
 
         x1 = tf.keras.layers.Dense(self.dense1)(x1)
         x1 = tf.keras.layers.LeakyReLU(alpha=0.3)(x1)
@@ -311,7 +311,9 @@ spacez=hp.choice('a',[
     'filter1' : hp.uniform('filter1', 12,128),
     'filter2' : hp.uniform('filter2', 8,128),
     'kernel1' : hp.uniform('kernel1', 2,9),
-    'kernel2' : hp.uniform('kernel2', 2,8)
+    'kernel2' : hp.uniform('kernel2', 2,8),
+    'batch' : hp.choice('batch', [1,2,4,8,16])  
+
       }])
 
 
@@ -323,11 +325,11 @@ def exp_eval(dicz):
     mm.filter2 = int(np.floor(dicz['filter2']))
     mm.kernel1 = int(np.floor(dicz['kernel1']))
     mm.kernel2 = int(np.floor(dicz['kernel2']))
-    mm.filter3 = 16
+    mm.filter3 = int(dicz['batch'])
     mm.kernel3 = 1
     mm.dense1 = 44
     lrate = 0.0008
-    batchsize = 1
+    batchsize = int(dicz['batch'])
     key = '2-dense_' + str(mm.filter1) + '_' + str(mm.kernel1) + '_' + str(mm.filter2) + '_' + str(mm.kernel2) + '_' + str(lrate) + 'batchsize: ' + str(batchsize) + '.png'
 
     print('f1 f2 --> {} - {} k1 - k2 --> {} - {} \n'.format(mm.filter1,mm.filter2,mm.kernel1,mm.kernel2))
