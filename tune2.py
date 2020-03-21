@@ -24,6 +24,8 @@ from hyperopt import fmin, tpe, hp, STATUS_OK, base,Trials
 import pickle
 
 
+
+os.chdir('/paperspace')
 print(os.getcwd())
 tf.keras.backend.set_floatx('float64')
 df = pd.read_excel('/abc.xlsx').fillna(method='ffill')
@@ -304,63 +306,7 @@ class MODELL(helpful):
         return fig
         
         
-        
-for con1,con2 in zipped:
-    os.chdir(os.path.expanduser("~"))
-    os.chdir('/notebooks')
-    mm = MODELL()
-    mm.outsize = 3
-    print('batchsize______________')
-
-    mm.filter1 = int(con1[0])
-    mm.filter2 = int(con2[0])
-    mm.kernel1 = int(con1[1])
-    mm.kernel2 = int(con2[1])
-    mm.filter3 = 16
-    mm.kernel3 = 1
-    mm.dense1 = 44
-    lrate = 0.0015
-    batchsize = 6
-
-    print('f1 f2 --> {} - {} k1 - k2 --> {} - {} \n'.format(mm.filter1,mm.filter2,mm.kernel1,mm.kernel2))
-    train_input, test_input, train_out, test_out = mm.preprocess(period=24,windowlength=24,split = 200)
-    mm.model_parallel_copy()
-    mm.optimizer = tf.keras.optimizers.Adam(learning_rate=lrate)
-    mm.windowbatch(batchsize,train_input,train_out,test_input,test_out)
-    mm.valid_data = mm.test_data
-    mm.epochz = 2001
-    mm.trainingz()
-    key = 'f1: ' + str(mm.filter1) +  'f2: ' + str(mm.filter2) + '  \n  k1: ' + str(mm.kernel1)  
-    key = key + 'k2: ' + str(mm.kernel2) + '\n batchsize: ' + str(batchsize)+ 'lrate: ' + str(lrate) + '\n 3-dense'
-    fig =plt.figure(figsize=(12,6))
-    fig.suptitle(key)
-    plt.plot(mm.hist)
-    plt.plot(mm.hist_valid)
-    plt.plot(np.full(shape=(np.array(mm.hist).shape[0]),fill_value=0.3),'--r')
-    plt.ylim((0.1,0.5))
-    
-    
-    key = '3-dense_' + str(mm.filter1) + '_' + str(mm.kernel1) + '_' + str(mm.filter2) + '_' + str(mm.kernel2) + '_' + str(lrate) + 'batchsize: ' + str(batchsize) + '.png'
-    try:
-        os.chdir('Conv1D - 1 layer - plots/')
-        plt.savefig(key)
-    except:
-        plt.savefig(key)
-
-        
-    plt.clf()
-
-    fig = mm.plotz('2000_epochs')
-
-        
-    try:
-        os.chdir('Conv1D - 1 layer - plots/')
-        plt.savefig('pred_' + key)
-    except:
-        plt.savefig('pred_' + key)
-        
-    del mm
-
+       
 
 spacez=hp.choice('a',[
       {  
