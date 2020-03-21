@@ -361,12 +361,11 @@ def exp_eval(dicz):
     key = str(mm.filter1) + '-' + str(mm.kernel1) +'-' + str(mm.filter2) +'-' + str(mm.kernel2) + str(mm.filter1) + '_' + str(mm.kernel1) + '_' + str(mm.filter2) + '_' + str(mm.kernel2) + '_' + str(lrate) + 'batchsize: ' + str(batchsize) + '.png'
 
     dirr =  '/artifacts/' + key 
-    os.mkdir(dirr)
     try:
         os.chdir('Conv1D - 1 layer - plots/')
-        plt.savefig(key)
+        plt.savefig(dirr)
     except:
-        plt.savefig(key)
+        plt.savefig(dirr)
 
         
     plt.clf()
@@ -376,9 +375,9 @@ def exp_eval(dicz):
         
     try:
         os.chdir('Conv1D - 1 layer - plots/')
-        plt.savefig('pred_' + key)
+        plt.savefig('/artifacts/pred_' + key )
     except:
-        plt.savefig('pred_' + key)
+        plt.savefig('/artifacts/pred_' + key )
     real, testpred, lossz = mm.model_test_out()
     del mm
     return {
