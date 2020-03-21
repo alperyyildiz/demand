@@ -315,7 +315,7 @@ k2 = [2,4,6]
 batch = [4,16,32]
 d_out = 0.4
 bnorm = True
-learn = 0.0007
+lrate = 0.0007
 
 
 for fsize in f1:
