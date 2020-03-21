@@ -306,15 +306,15 @@ class MODELL(helpful):
         return fig
 
     
-f1 = [16,24,32,64,84]
-f2 = [16,24,32,48,64,96]
-d1 = [16,24,32,48,64,72]
-k1 = [2,3,4,6,8,10]
-k2 = [2,3,4,6]
-
-batch = [4,8,16,24,32]
+f1 = [16,32,64,84]
+f2 = [16,32,48,64,96]
+d1 = [32,48,64]
+k1 = [2,3,4,6,8]
+k2 = [2,4,6]
+tt = 
+batch = [4,16,32]
 d_out = 0.4
-BN = [False,True]
+BN = True
 learn = 0.0007
 
 
@@ -343,7 +343,7 @@ for fsize in f1:
                             mm.batch = bsize
                             mm.d_out = dout
 
-                            print('f1 f2 --> {}  {} dense: {} ---  k1 - k2 --> {} - {} \n  batch: {} d.out: {}  lrate: {}   BN : {} \n '.format(mm.filter1,mm.filter2,mm.dense1,mm.kernel1,mm.kernel2,mm.batch,mm.d_out,lrate,mm.BN))
+                            print('f1: {} ---- f2: {}   d: {}   k1:  {}  k2: {}'.format(fsize,fsize_2,fsize_d,kern1,kern2))   
                             train_input, test_input, train_out, test_out = mm.preprocess(period=24,windowlength=mm.windowlength,split = 200)
                             mm.model_parallel_copy()
                             mm.optimizer = tf.keras.optimizers.Adam(learning_rate=lrate)
