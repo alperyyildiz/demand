@@ -26,7 +26,7 @@ os.chdir(os.path.expanduser("~"))
 os.chdir('/notebooks')
 
 tf.keras.backend.set_floatx('float64')
-df = pd.read_excel('abc.xlsx').fillna(method='ffill')
+df = pd.read_excel('/abc.xlsx').fillna(method='ffill')
 print('HELLOOOOOO')
 
 def test_step(modell):
