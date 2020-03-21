@@ -319,7 +319,7 @@ k2 = [3,4,8]
 
 batch = 32
 d_out = 0.4
-BN = [False,True]
+BN = [True,True]
 lrate = 0.0007
 
 
