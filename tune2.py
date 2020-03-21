@@ -205,14 +205,16 @@ class MODELL(helpful):
         regularizer =  tf.keras.regularizers.l2(l=0.01)
         #,activity_regularizer=regularizer,
         x1 = tf.keras.layers.Conv1D(self.filter1,kernel_initializer=self.initz,activity_regularizer=regularizer,kernel_size=self.kernel1)(inp)
+        x1 = tf.keras.layers.BatchNormalization()(x1)
         x1 = tf.keras.layers.LeakyReLU(alpha=0.2)(x1)
         x1 = tf.keras.layers.Dropout(0.42)(x1)
         x1 = tf.keras.layers.Conv1D(self.filter2,kernel_initializer=self.initz,activity_regularizer=regularizer,kernel_size=self.kernel2)(x1)
+        x1 = tf.keras.layers.BatchNormalization()(x1)        
         x1 = tf.keras.layers.LeakyReLU(alpha=0.2)(x1)
         x1 = tf.keras.layers.Dropout(0.42)(x1)
-        x1 = tf.keras.layers.MaxPooling1D(pool_size=2)(x1)
         x1 = tf.keras.layers.Conv1D(self.filter3,kernel_initializer=self.initz,activity_regularizer=regularizer,kernel_size=self.kernel3)(x1)
         x1 = tf.keras.layers.LeakyReLU(alpha=0.2)(x1)
+        x1 = tf.keras.layers.BatchNormalization()(x1)
         x1 = tf.keras.layers.Dropout(0.42)(x1)
 
         #x1 = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(48, return_sequences=True))(x1)
