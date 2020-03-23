@@ -129,7 +129,7 @@ class MODELL(helpful):
         loss_value_v = self.loss_mse(model_out_v, real_out_v)
         return self.loss_metric_valid(loss_value_v)
 
-    
+    @tf.function
     def test_step(self):
         for it,data in enumerate(iter(self.test_data),start=0):
             model_inp,test_out = data
@@ -216,7 +216,14 @@ class MODELL(helpful):
         x = tf.keras.layers.Dropout(self.LST[key]['D_OUT'])(x)
         return x
     
-
+    def DENSE_block(self,key,inp):
+        x = tf.keras.layers.Dense(self.DEN[key]['FIL'],kernel_initializer=self.DEN[key]['INIT'])(inp)
+        if self.DEN[key]['BN']:
+            x = tf.keras.layers.BatchNormalization()(x)
+        x = tf.keras.layers.LeakyReLU(alpha=0.25)(x)
+        x = tf.keras.layers.Dropout(self.DEN[key]['D_OUT'])(x)
+        return x
+    
     def model_parallel_copy(self):
         inp = tf.keras.layers.Input(shape=(self.windowlength,3))
         for key in self.CON['list']:
@@ -227,13 +234,11 @@ class MODELL(helpful):
 
         for key in self.LST['list']:
             x1 = self.LSTM_block(key,x1)
-        x1 = tf.keras.layers.Flatten()(x1)
+        x = tf.keras.layers.Flatten()(x1)
 
-        x1 = tf.keras.layers.Dense(32)(x1)
-
-        x1 = tf.keras.layers.LeakyReLU(alpha=0.2)(x1)
-        x1 = tf.keras.layers.Dropout(0.3)(x1)
-        out = tf.keras.layers.Dense(self.outsize,use_bias = False)(x1)
+        for key in self.DEN['list']:
+            x = self.DENSE_block(key,x)
+        out = tf.keras.layers.Dense(self.outsize,use_bias = False)(x)
         self.modell=tf.keras.Model(inp,out)
 
     def preprocess(self,period,split,windowlength):
@@ -308,21 +313,28 @@ class MODELL(helpful):
         return fig
 
         
+
 bsize = 32
 bnorm = False
 
 
 mm = MODELL()
+mm.lrate = 0.001
 mm.outsize = 3
-mm.CON = {'list':['1','2','3'],
-        '1': {'FIL':128, 'KER': 4, 'D_OUT': 0.2, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.02 },
-        '2': {'FIL':84, 'KER': 4, 'D_OUT': 0.2, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
+mm.CON = {'list':['1','2'],
+        '1': {'FIL':128, 'KER': 4, 'D_OUT': 0.5, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.02 },
+        '2': {'FIL':84, 'KER': 4, 'D_OUT': 0.5, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
         '3': {'FIL':48, 'KER': 2, 'D_OUT': 0.2, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 }
        }
 mm.LST = {'list':['1','2'],
        '1': {'FIL':128, 'SEQ': True, 'D_OUT': 0.2, 'BN': False,  'INIT': 'glorot_uniform' },
-       '2': {'FIL':64,  'SEQ': True, 'D_OUT': 0.2, 'BN': False,  'INIT': 'glorot_uniform'}
+       '2': {'FIL':64,  'SEQ': True, 'D_OUT': 0.2, 'BN': False,  'INIT': 'glorot_normal'}
       }
+mm.DEN = {'list':['1','2'],
+       '1': {'FIL':512,  'D_OUT': 0.6, 'BN': False,  'INIT': 'glorot_uniform' },
+       '2': {'FIL':128,  'D_OUT': 0.4, 'BN': False,  'INIT': 'glorot_uniform'}
+      }
+       
        
 mm.windowlength=24
 mm.batch = bsize
