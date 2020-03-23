@@ -1,0 +1,38 @@
+bsize = 32
+bnorm = False
+dense = [48,128]
+
+for den in dense:
+    try:
+        del mm
+    except:
+        pass
+    mm = MODELL()
+    mm.lrate = 0.0008
+    mm.outsize = 4
+    mm.CON = {'list':['1','2'],
+            '1': {'FIL':128, 'KER': 8, 'D_OUT': 0.8, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
+            '2': {'FIL':84, 'KER': 8, 'D_OUT': 0.8, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
+            #'3': {'FIL':48, 'KER': 2, 'D_OUT': 0.2, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 }
+           }
+    mm.LST = {'list':['1'],
+           '1': {'FIL':48, 'SEQ': True, 'D_OUT': 0.7, 'BN': False,  'INIT': 'glorot_uniform' },
+           '2': {'FIL':96,  'SEQ': True, 'D_OUT': 0.4, 'BN': False,  'INIT': 'glorot_uniform'}
+          }
+    mm.DEN = {'list':['1'],
+           '1': {'FIL':den,  'D_OUT': 0.4, 'BN': False,  'INIT': 'glorot_uniform' },
+           '2': {'FIL':32,  'D_OUT': 0.4, 'BN': False,  'INIT': 'glorot_uniform'}
+          }
+
+    mm.windowlength=16
+    mm.MAX_window = 16
+    mm.batch = bsize
+    train_input, test_input, train_out, test_out = mm.preprocess(period=24,windowlength=mm.windowlength,split = 216)
+    mm.model_parallel_copy()
+    mm.optimizer = tf.keras.optimizers.Adam(learning_rate=mm.lrate)
+    mm.windowbatch(train_input,train_out,test_input,test_out)
+    mm.valid_data = mm.test_data
+    mm.epochz = 501
+    mm.trainingz()
+    fig = mm.plotz('500_epochs')
+    plt.savefig(str(den),figsize = (12,4))
