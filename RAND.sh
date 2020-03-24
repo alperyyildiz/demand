@@ -9,4 +9,4 @@ pip install keras
 pip install xlrd
 pip install hyperopt
 pip install statsmodels
-python gridsearch.py
+python RAND.py
