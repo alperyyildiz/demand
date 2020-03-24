@@ -1,3 +1,4 @@
+  
 from __future__ import absolute_import, division, print_function, unicode_literals
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -269,7 +270,13 @@ class MODELL(helpful):
             
         res = STL(arr,period=16,seasonal = 23 , trend = 25).fit()
         observed = res.observed
-        
+        print(np.array(res.observed).shape)
+        print(np.array(res.resid).shape)
+        print(np.array(res.seasonal).shape)
+        print(np.array(res.trend).shape)
+        print(np.array(vix).shape)
+        print(np.array(dollars).shape)
+        a = np.concatenate([np.array(res.observed).reshape(observed.shape[0],1),np.array(res.seasonal).reshape(observed.shape[0],1),np.array(res.trend).reshape(observed.shape[0],1),np.array(res.resid).reshape(observed.shape[0],1).reshape(observed.shape[0],1),np.array(vix).reshape(observed.shape[0],1),np.array(dollars).reshape(observed.shape[0],1)],axis=1)
         dataz = np.swapaxes(np.array([res.observed,res.seasonal,res.trend,res.resid,vix,dollars]),0,1)
         train = dataz[:split]
         test = dataz[split:]
