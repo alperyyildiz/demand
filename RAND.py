@@ -334,7 +334,7 @@ class MODELL(helpful):
     
     def SAVE_PLOTS(self):
         first_Con = True
-        SAVE_DIR = 'artifacts/'
+        SAVE_DIR = '/artifacts/'
         for con in range(len(self.CON['list'])):
             if first_Con:
                 SAVE_DIR = SAVE_DIR +'CON_' + str(self.CON['list'][con])
