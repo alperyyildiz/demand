@@ -193,7 +193,7 @@ class MODELL(helpful):
                     self.test_loss.append(lloss.numpy())
             
             template = 'Sec : {} \n Epoch {} ---- Loss: {}  ----  Val_Loss: {}'
-            tf.print('Epoch', epoch, ': Time', time.time()-start, ': loss', self.loss_metric.result(), ': valid_loss', self.loss_metric_valid.result())
+            #tf.print('Epoch', epoch, ': Time', time.time()-start, ': loss', self.loss_metric.result(), ': valid_loss', self.loss_metric_valid.result())
             self.hist.append(self.loss_metric.result())
             self.hist_valid.append(self.loss_metric_valid.result())
             self.loss_metric.reset_states()
@@ -352,15 +352,18 @@ class MODELL(helpful):
 
         first_con_f = True
         SAVE_CON = ''
-        key = ''
+        key = 'lr-' + str(self.lrate)[:7] + '_'
+        key2 = 'lr-' + str(self.lrate)[:7] + '_'
         for con in self.CON['list']:
             if first_con_f:
                 SAVE_CON = 'C' + con + '-' + str(self.CON[con]['FIL'])
                 first_con_f = False
-                key = 'C' + con + '_' + 'DO' + '-' + str(self.CON[con]['D_OUT'])  + '_' + 'BN' + '-' + str(self.CON[con]['BN']) + '_' + 'IN' + '-' + str(self.CON[con]['INIT']) + '_' + 'RG' + '-' + str(self.CON[con]['REG'])
+                key = key + 'C' + con + '_ker-' + str(self.CON[con]['KER']) +  '_DO' + '-' + str(self.CON[con]['D_OUT'])  + '_' + 'BN' + '-' + str(self.CON[con]['BN'])  + '_' + 'RG' + '-' + str(self.CON[con]['REG'])
+                key2 = key2 + 'C' + con + '_ker-' + str(self.CON[con]['KER'])  +  '_DO' + '-' + str(self.CON[con]['D_OUT'])  + '_' + 'BN' + '-' + str(self.CON[con]['BN']) + '_' + 'RG' + '-' + str(self.CON[con]['REG']) + '\n'
             else:
                 SAVE_CON = SAVE_CON + '_C' + con + '-' + str(self.CON[con]['FIL'])
-                key = '_' + key +  '__C' + con + '_' + 'DO' + '-' + str(self.CON[con]['D_OUT']) + 'BN' + '-' + str(self.CON[con]['BN']) + 'IN' + '-' + str(self.CON[con]['INIT']) + 'RG' + '-' + str(self.CON[con]['REG'])
+                key = '_' + key +  '__C' + con+ '_ker-' + str(self.CON[con]['KER']) + '_' + 'DO' + '-' + str(self.CON[con]['D_OUT']) + '_BN' + '-' + str(self.CON[con]['BN'])  + '_RG' + '-' + str(self.CON[con]['REG'])
+                key2 = key2 + 'C' + con+ '_ker-' + str(self.CON[con]['KER']) +  '_DO' + '-' + str(self.CON[con]['D_OUT'])  + '_BN' + '-' + str(self.CON[con]['BN']) + '_RG' + '-' + str(self.CON[con]['REG']) + '\n'
 
         if ~first_con_f:
             SAVE_DIR = SAVE_DIR + '/' + SAVE_CON
@@ -375,11 +378,12 @@ class MODELL(helpful):
             if first_lstm_f:
                 SAVE_LS = 'LS' + '_' + ls + '-' + str(self.LST[ls]['FIL'])
                 first_lstm_f = False
-                key = '_' + key +  '__LS' + ls + '_' + 'DO' + '-' + str(self.LST[ls]['D_OUT']) + 'IN' + '-' + str(self.LST[ls]['INIT'])
+                key = '_' + key +  '__LS' + ls + '_DO' + '-' + str(self.LST[ls]['D_OUT']) 
+                key2 = '_' + key +  '__LS' + ls + '_DO' + '-' + str(self.LST[ls]['D_OUT']) + '\n'
             else:
                 SAVE_LS = SAVE_LS + '_LS' + '_' + ls + '-' + str(self.LST[ls]['FIL'])
-                key = '_' + key +  '__LS' + ls + '_' + 'DO' + '-' + str(self.LST[ls]['D_OUT']) + 'IN' + '-' + str(self.LST[ls]['INIT'])
-
+                key = '_' + key +  '__LS' + ls + '_DO' + '-' + str(self.LST[ls]['D_OUT']) +  '-' + str(self.LST[ls]['INIT'])
+                key2 = '_' + key2 +  '__LS' + ls + '_DO' + '-' + str(self.LST[ls]['D_OUT']) + '-' + str(self.LST[ls]['INIT']) + '\n'
         if ~first_lstm_f:
             SAVE_DIR = SAVE_DIR + '/' + SAVE_LS
 
@@ -394,10 +398,12 @@ class MODELL(helpful):
             if first_dense_f:
                 SAVE_DEN = 'D' + '_' + dense + '-' + str(self.DEN[dense]['FIL'])
                 first_dense_f = False
-                key = '_' + key +  '__DEN' + dense + '_' + 'DO' + '-' + str(self.DEN[dense]['D_OUT']) + 'BN' + '-' + str(self.DEN[dense]['BN']) + 'IN' + '-' + str(self.DEN[dense]['INIT']) 
+                key = '_' + key +  '__DEN' + dense + '_' + 'DO' + '-' + str(self.DEN[dense]['D_OUT']) + '_BN' + '-' + str(self.DEN[dense]['BN']) 
+                key2 = '_' + key2 +  '__DEN' + dense + '_' + 'DO' + '-' + str(self.DEN[dense]['D_OUT']) + '_BN' + '-' + str(self.DEN[dense]['BN']) + '\n'
             else:
                 SAVE_DEN = SAVE_DEN + '_D' + '_' + dense + '-' + str(self.DEN[dense]['FIL'])
-                key = '_' + key +  '__DEN' + dense + '_' + 'DO' + '-' + str(self.DEN[dense]['D_OUT']) + 'BN' + '-' + str(self.DEN[dense]['BN']) + 'IN' + '-' + str(self.DEN[dense]['INIT']) 
+                key = '_' + key +  '__DEN' + dense + '_' + 'DO' + '-' + str(self.DEN[dense]['D_OUT']) + '_BN' + '-' + str(self.DEN[dense]['BN'])  
+                key2 = '_' + key2 +  '__DEN' + dense + '_' + 'DO' + '-' + str(self.DEN[dense]['D_OUT']) + '_BN' + '-' + str(self.DEN[dense]['BN'])  + '\n'
 
         if ~first_dense_f:
             SAVE_DIR = SAVE_DIR + '/' + SAVE_DEN 
@@ -407,25 +413,63 @@ class MODELL(helpful):
         except:
             pass    
 
-        fig =plt.figure(figsize=(12,6))
-        fig.suptitle(key)
+        fig = plt.figure(figsize=(12,6))
+        fig.suptitle(key2)
         plt.plot(self.hist)
         plt.plot(self.hist_valid)
         plt.plot(np.full(shape=(np.array(self.hist).shape[0]),fill_value=0.2),'--r')
         plt.plot(np.full(shape=(np.array(self.hist).shape[0]),fill_value=0.3),'--b')
         plt.ylim((0.1,0.5))
 
-        fig = self.plotz(str(self.epochz-1) + '_epochs')
         plt.savefig(SAVE_DIR + '/' + key + '.png')
 
 
         plt.clf()
 
-        fig = self.plotz(str(self.epochz-1) + '_epochs')
+        fig2 = self.plotz(str(self.epochz-1) + '_epochs')
 
 
         plt.savefig(SAVE_DIR + '/'+ 'preds_' + key + '.png')
 
         del fig     
 
+bsize = 32
+bnorm = False
+kernel = [4,8]
+
+for ker1 in kernel:
+    for ker2 in kernel:
+        try:
+            del mm
+        except:
+            pass
+        mm = MODELL()
+        mm.lrate = 0.0008
+        mm.outsize = 4
+        mm.CON = {'list':['1','2'],
+                '1': {'FIL':128, 'KER': ker1, 'D_OUT': 0.8, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
+                '2': {'FIL':84, 'KER': ker2, 'D_OUT': 0.8, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
+                #'3': {'FIL':48, 'KER': 2, 'D_OUT': 0.2, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 }
+               }
+        mm.LST = {'list':['1'],
+               '1': {'FIL':128, 'SEQ': True, 'D_OUT': 0.6, 'BN': False,  'INIT': 'glorot_uniform' },
+               '2': {'FIL':96,  'SEQ': True, 'D_OUT': 0.4, 'BN': False,  'INIT': 'glorot_uniform'}
+              }
+        mm.DEN = {'list':['1'],
+               '1': {'FIL':64,  'D_OUT': 0.4, 'BN': False,  'INIT': 'glorot_uniform' },
+               '2': {'FIL':32,  'D_OUT': 0.4, 'BN': False,  'INIT': 'glorot_uniform'}
+              }
+
+        mm.windowlength=16
+        mm.MAX_window = 16
+        mm.batch = bsize
+        train_input, test_input, train_out, test_out = mm.preprocess(period=24,windowlength=mm.windowlength,split = 216)
+        mm.model_parallel_copy()
+        mm.optimizer = tf.keras.optimizers.Adam(learning_rate=mm.lrate)
+        mm.windowbatch(train_input,train_out,test_input,test_out)
+        mm.valid_data = mm.test_data
+        mm.epochz = 601
+        mm.trainingz()
+        mm.SAVE_PLOTS()
+        
         
