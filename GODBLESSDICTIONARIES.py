@@ -85,6 +85,7 @@ class MODELL(helpful):
         self.batch = 4
         self.windowlength = 24
         self.featuresize = 6
+        self.keylist = {}
         self.train_mean = None
         self.train_std = None
         self.train_data = None
@@ -439,12 +440,11 @@ class MODELL(helpful):
         plt.close('all')
 
 
-    
-    def SAVE_PLOTS_V2(self,varlist):
+        
+    def CREATE_DIR(self):
         first_Con = True
         SAVE_DIR = 'storage/'
-        SAVE_DIR = SAVE_DIR + str(datetime.now())[:-10]
-        os.mkdir(SAVE_DIR)
+
         for con in range(len(self.dict['CON']['list'])):
             if first_Con:
                 SAVE_DIR = SAVE_DIR +'CON_' + str(self.dict['CON']['list'][con])
@@ -471,10 +471,15 @@ class MODELL(helpful):
                 SAVE_DIR = SAVE_DIR + '_' + str(self.dict['DEN']['list'][dense])
         try: 
             os.mkdir(SAVE_DIR)
+            self.save_DIR = SAVE_DIR
         except:
             pass
-
-        self.keylist = {}
+        
+        self.save_DIR = SAVE_DIR + '/' +str(datetime.now())[:-10]
+        os.mkdir(SAVE_DIR)
+    
+    
+    def CREATE_KEYS(self):
         first_con_f = True
         SAVE_CON = ''
         key_CONST = ''
@@ -502,15 +507,22 @@ class MODELL(helpful):
 
                         for var in list(self.dict[Layer_TYP][LAYER_NUM].keys()):
 
-                            if var not in varlist[LAYER_NUM]:
+                            if var not in self.VARS_EX[LAYER_NUM]:
                                 key_CONST  = key_CONST + var + ': ' + str(self.dict[Layer_TYP][LAYER_NUM][var]) + ' -- '
                             else:
                                 key_VAR = key_VAR + var + ' - ' + str(self.dict[Layer_TYP][LAYER_NUM][var]) + ' // '
                                 save_NAME = save_NAME + var[0] + '-' + str(self.dict[Layer_TYP][LAYER_NUM][var]) + '//'
         
-        key_VAR = key_VAR[:-3]
-        key_CONST = key_CONST[:-3]
-        save_NAME = save_NAME[:-5]
+        self.key_VAR = key_VAR[:-3]
+        self.key_CONST = key_CONST[:-3]
+        self.save_NAME = save_NAME[:-5]
+        text_file = open("CONSTANT HyperParameters.txt", "w")
+        text_file.write(key_CONST)
+        text_file.close()
+
+  
+    def SAVE_PLOTS_V2(self):
+  
         fig = plt.figure(figsize=(12,6))
         fig.suptitle(key_VAR)
         plt.plot(self.hist)
@@ -518,8 +530,8 @@ class MODELL(helpful):
         plt.plot(np.full(shape=(np.array(self.hist).shape[0]),fill_value=0.2),'--r')
         plt.plot(np.full(shape=(np.array(self.hist).shape[0]),fill_value=0.3),'--b')
         plt.ylim((0.1,0.5))
-        plt.savefig( SAVE_DIR + '/' + save_NAME + '.png')
+        plt.savefig( self.save_DIR + '/' + save_NAME + '.png')
         fig2 = self.plotz(str(self.epochz-1) + '_epochs')
-        plt.savefig( SAVE_DIR + '/'+ 'preds_' + save_NAME + '.png')
+        plt.savefig( self.save_DIR + '/'+ 'preds_' + save_NAME + '.png')
         plt.close('all')
         
