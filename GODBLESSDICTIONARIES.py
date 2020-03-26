@@ -478,51 +478,53 @@ class MODELL(helpful):
         self.save_DIR = SAVE_DIR + '/' +str(datetime.now())[:-10]
         os.mkdir(SAVE_DIR)
     
-    
-    def CREATE_KEYS(self):
+    def CREATE_SAVE_NAME(self):
+        first_con_f = True
+        save_NAME = ''
+        key_VAR = ''
+        for Layer_TYP in list(self.VAR_EX.keys()):
+            key_VAR = key_VAR + '\n'
+            for kk,layer_NUM in enumerate(list(self.VAR_EX[layer_TYP].keys())):
+                if kk==0:
+                    key_VAR = key_VAR + Layer_TYP  + '-' + layer_NUM + ':  '
+                    save_NAME = save_NAME + '---'+  Layer_TYP[0]  + layer_NUM
+                else:
+                    key_VAR = '---' + key_VAR + Layer_TYP  + '-' + layer_NUM + ':  '
+                    save_NAME = '---' + save_NAME + '---'+  Layer_TYP[0]  + layer_NUM                
+                VALUES = ''
+                save_VALUES = ''
+                for VAR in list(self.VAR_EX[layer_TYP][layer_NUM].keys()):
+                        save_VALUES = save_VALUES  + '---'+  Layer_TYP[0]  + layer_NUM + '-' + VAR[0] + '-' + self.VAR_EX[layer_TYP][layer_NUM][VAR]
+                        VALUES = VALUES +  + ': ' + VAR + ' = ' + self.VAR_EX[layer_TYP][layer_NUM][VAR] + 
+                    else:
+                        save_VALUES = save_VALUES  + '---'+  Layer_TYP[0]  + layer_NUM + '-' + VAR[0] + '-' + self.VAR_EX[layer_TYP][layer_NUM][VAR]
+        key_VAR = key_VAR + VALUES
+        save_NAME = save_NAME + VALUES
+        save_NAME_PRED = save_NAME + 'PRED_' + VALUES
+        return key_VAR, save_NAME, save_NAME_PRED
+
+    def WRITE_CONSTANTS(self):
         first_con_f = True
         SAVE_CON = ''
         key_CONST = ''
-        key_VAR = ''
-        save_NAME = ''
         for lt, Layer_TYP in enumerate(list(self.dict.keys())):
-            if lt > 0:
-                save_NAME = save_NAME + '---'
             if len(self.dict[Layer_TYP]['list']) > 0:
-
                 for i,LAYER_NUM in enumerate(list(self.dict[Layer_TYP]['list'])):
-
                     if LAYER_NUM != 'list':
                         key_CONST = key_CONST[:-3] + ' \n '
-                        key_VAR = key_VAR[:-3] + ' \n '
                         key_CONST = key_CONST + Layer_TYP[0] + LAYER_NUM + ': '
-                        key_VAR = key_VAR + Layer_TYP[0] + LAYER_NUM + ' '
-                        
-                        if i == 0:
-                            save_NAME = save_NAME + Layer_TYP[0] + LAYER_NUM  + '_'
-                        else:
-                            save_NAME = save_NAME[:-2] + '---' + Layer_TYP[0] + LAYER_NUM  + '_'
-                            
-                        print(LAYER_NUM)
-
                         for var in list(self.dict[Layer_TYP][LAYER_NUM].keys()):
-
-                            if var not in self.VARS_EX[LAYER_NUM]:
+                            if var not in list(self.VARS_EX[Layer_TYP][LAYER_NUM]):
                                 key_CONST  = key_CONST + var + ': ' + str(self.dict[Layer_TYP][LAYER_NUM][var]) + ' -- '
-                            else:
-                                key_VAR = key_VAR + var + ' - ' + str(self.dict[Layer_TYP][LAYER_NUM][var]) + ' // '
-                                save_NAME = save_NAME + var[0] + '-' + str(self.dict[Layer_TYP][LAYER_NUM][var]) + '//'
         
-        self.key_VAR = key_VAR[:-3]
         self.key_CONST = key_CONST[:-3]
-        self.save_NAME = save_NAME[:-5]
         text_file = open("CONSTANT HyperParameters.txt", "w")
         text_file.write(key_CONST)
         text_file.close()
 
   
     def SAVE_PLOTS_V2(self):
-  
+        key_VAR, save_NAME, save_NAME_PRED = self.CREATE_SAVE_NAME()
         fig = plt.figure(figsize=(12,6))
         fig.suptitle(key_VAR)
         plt.plot(self.hist)
@@ -531,7 +533,89 @@ class MODELL(helpful):
         plt.plot(np.full(shape=(np.array(self.hist).shape[0]),fill_value=0.3),'--b')
         plt.ylim((0.1,0.5))
         plt.savefig( self.save_DIR + '/' + save_NAME + '.png')
+        
         fig2 = self.plotz(str(self.epochz-1) + '_epochs')
-        plt.savefig( self.save_DIR + '/'+ 'preds_' + save_NAME + '.png')
+        plt.savefig(save_NAME_PRED + '.png')
         plt.close('all')
         
+    def dict_UPDATE(self):
+        for param in list(mm.VARS_EX.keys()):
+            for sec_param in list(self.VARS_EX[param].keys()):
+                for VAR in list(self.VARS_EX[param][sec_param].keys()):
+                    self.dict[param][sec_param][VAR] = self.VARS_EX[param][sec_param][VAR]
+
+
+
+
+bsize = 32
+kernel = [(6,3),(8,6),(8,8),(4,4),(8,2)]
+d_out = [0.6,0.8]
+TF = [True,False]
+dense_list= [['1'],['1','2']]
+filt =[(48,36),(64,42),(84,64),(112,72),(128,96),(144,48)]
+k3 = ''
+try:
+    del mm
+except:
+    pass
+count = 0
+mm = MODELL()
+
+mm.dict = {'CON' : {'list':['1','2'],
+        '1': {'FIL':32, 'KER': 8, 'D_OUT': 0, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.02 },
+        '2': {'FIL':16, 'KER': 8, 'D_OUT': 0.6, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
+        #'3': {'FIL':48, 'KER': 2, 'D_OUT': 0.2, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 }
+       },
+          'LST' : {'list':['1'],
+       '1': {'FIL':t, 'SEQ': True, 'D_OUT': 0, 'BN': False,  'INIT': 'glorot_normal' },
+       '2': {'FIL':96,  'SEQ': True, 'D_OUT': 0.4, 'BN': False,  'INIT': 'glorot_normal'}
+      },
+          'DEN': {'list':[],
+       '1': {'FIL':98,  'D_OUT': 0.5, 'BN': False,  'INIT': 'glorot_uniform' },
+       '2': {'FIL':48,  'D_OUT': 0.5, 'BN': False,  'INIT': 'glorot_uniform'},
+       '3': {'FIL':16,  'D_OUT': 0.5, 'BN': False,  'INIT': 'glorot_uniform'}
+
+      }}
+mm.CREATE_KEYS()
+mm.WRITE_CONSTANTS()
+
+
+mm.VARS_EX = {'CON' :{'1': {'KER': [4,6],
+                            'D_OUT': [0.3,0.6],
+                           }
+                      '2': {'KER': [8,2],
+                            'D_OUT': [0.5,0.8],
+                           }
+                     }
+              'LST' :{'1': {'FIL': [12,24],
+                     
+                            
+mm.dict_UPDATE()
+
+mm.lrate = 0.0006
+
+
+
+
+for param in list(mm.VARS_EX.keys()):
+        for sec_param in list(mm.VARS_EX[param].keys()):
+            for VAR in list(mm.VARS_EX[param][sec_param].keys()):
+                try:
+                    keras.backend.clear_session()
+                except:
+                    pass
+                mm.dict[param][sec_param][VAR] = mm.VARS_EX[param][sec_param][VAR]
+
+                mm.outsize = 4
+
+                mm.windowlength=24
+                mm.MAX_window = 24
+                mm.batch = bsize
+                train_input, test_input, train_out, test_out = mm.preprocess(period=24,windowlength=mm.windowlength,split = 216)
+                mm.model_parallel_copy()
+                mm.optimizer = tf.keras.optimizers.Adam(learning_rate=mm.lrate)
+                mm.windowbatch(train_input,train_out,test_input,test_out)
+                mm.valid_data = mm.test_data
+                mm.epochz = 
+                mm.trainingz()
+                k1,k2,k3 = mm.SAVE_PLOTS_V2()
