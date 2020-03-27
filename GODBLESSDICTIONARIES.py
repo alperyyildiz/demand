@@ -83,7 +83,7 @@ class helpful:
     
     
     #PLOTS TEST OUTPUT FOR GIVEN EPOCH KEY
-    def plotz(self,keyz):
+    def plotz(self):
 
         timereal = np.array([i for i in range(50)])
         timez = np.zeros((50,self.dict['OTHERS']['1']['OUT_SIZE']))
@@ -435,7 +435,7 @@ class MODELL(helpful):
         plt.ylim((0.1,0.5))
         plt.savefig( self.save_DIR + '/' + save_NAME + '.png')
         
-        fig2 = self.plotz(str(self.epochz-1) + '_epochs')
+        fig2 = self.plotz()
         plt.savefig(self.save_DIR + '/' + save_NAME_PRED + '.png')
         plt.close('all')
         self.keyz.append(save_NAME)
@@ -508,7 +508,7 @@ class MODELL(helpful):
         self.model_parallel()
         self.trainingz()
         self.SAVE_PLOTS()
-        
+        print(self.epochz)
         
 
     #CREATES SAVE NAME FOR BOTH PLOTS
@@ -580,18 +580,17 @@ mm.dict = {'CON' : {'list': ['1','2'],
                    }
           }
 
-mm.VARS_EX = {'CON' :{'1': {'FIL': [48,84,164],
+mm.VARS_EX = {'CON' :{'1': {'FIL': [48,96,164],
                             'D_OUT': [0,0.6]
                            },
-                      '2': {'FIL': [32,64],
-                            'D_OUT': [0,0.6]
+                      '2': {'FIL': [48,64]
                            }
                      },
-              'LST' :{'1': {'FIL': [48,128],
-                            'D_OUT': [0,0.3]
+              'LST' :{'1': {'FIL': [84,128],
+                            'D_OUT': [0,0.5]
                            }
                      },
-              'DEN' :{'1': {'FIL': [48,96],
+              'DEN' :{'1': {'FIL': [48,96]
                             'D_OUT': [0,0.5]
                            }
                      },
@@ -599,6 +598,7 @@ mm.VARS_EX = {'CON' :{'1': {'FIL': [48,84,164],
                             }
                        }
              }
+
 
 mm.CREATE_DIR()
 mm.WRITE_CONSTANTS()  
