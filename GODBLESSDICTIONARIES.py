@@ -22,7 +22,7 @@ from sklearn import preprocessing
 from hyperopt import fmin, tpe, hp, STATUS_OK, base,Trials
 
 tf.keras.backend.set_floatx('float32')
-df = pd.read_excel('storage/clean.xlsx').dropna()
+df = pd.read_excel('clean.xlsx').dropna()
 print('HELLOOOOOO')
 
 
@@ -32,13 +32,13 @@ class helpful:
         windowlength = self.dict['OTHERS']['1']['WINDOW_LEN']
         outsize = self.dict['OTHERS']['1']['OUT_SIZE']
         arr = np.asarray(self.data['sales'])
-        vv =pd.read_csv('storage/vix.csv',sep=',')
+        vv =pd.read_csv('vix.csv',sep=',')
 
         vix = np.array(vv['Şimdi'])
         for i in range(len(vix)):
             vix[i] = float(vix[i].replace(',','.'))
 
-        dol =pd.read_csv('storage/dollar.csv',sep=',')
+        dol =pd.read_csv('dollar.csv',sep=',')
         dollars = np.array(dol['Şimdi'])
         for i in range(len(dollars)):
             dollars[i] = float(dollars[i].replace(',','.'))
@@ -231,11 +231,11 @@ class MODELL(helpful):
         self.loss_metric_test = tf.keras.metrics.Mean(name='loss_metric_test')
         self.checkpoints = {}
         self.firsttime = True
-        self.data = pd.read_excel('storage/clean.xlsx').dropna()
+        self.data = pd.read_excel('clean.xlsx').dropna()
         self.scaler = StandardScaler()
         self.FIRST_ITER = True
         self.optimizer = tf.keras.optimizers.Adam()
-    
+        self.keyz = list()
     #TRAIN ITERATION FOR MINI BATCH TRAIN
     @tf.function
     def train_step(self,data):
@@ -329,7 +329,7 @@ class MODELL(helpful):
     #EXPERIMENT DATE AND START TIME
     def CREATE_DIR(self):
         first_Con = True
-        SAVE_DIR = 'storage/'
+        SAVE_DIR = 'artifacts/'
 
         for con in range(len(self.dict['CON']['list'])):
             if first_Con:
@@ -438,6 +438,7 @@ class MODELL(helpful):
         fig2 = self.plotz(str(self.epochz-1) + '_epochs')
         plt.savefig(self.save_DIR + '/' + save_NAME_PRED + '.png')
         plt.close('all')
+        self.keyz.append(save_NAME)
 
     
     #SET INITIAL MODEL CHANGING PARAMETERS AS FIRST OF THEIR LIST VALUES
@@ -558,39 +559,45 @@ class MODELL(helpful):
             
 mm = MODELL()
 mm.dict = {'CON' : {'list': ['1','2'],
-        '1': {'FIL':32, 'KER': 8, 'D_OUT': 0, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
-        '2': {'FIL':16, 'KER': 8, 'D_OUT': 0, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
+        '1': {'FIL':84, 'KER': 8, 'D_OUT': 0, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
+        '2': {'FIL':48, 'KER': 4, 'D_OUT': 0, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
         '3': {'FIL':48, 'KER': 2, 'D_OUT': 0, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 }
                    },
            
           'LST' : {'list':['1'],
-       '1': {'FIL':32, 'SEQ': True, 'D_OUT': 0, 'BN': False,  'INIT': 'glorot_uniform' },
+       '1': {'FIL':64, 'SEQ': True, 'D_OUT': 0, 'BN': False,  'INIT': 'glorot_uniform' },
        '2': {'FIL':24,  'SEQ': True, 'D_OUT': 0, 'BN': False,  'INIT': 'glorot_uniform'}
                   },
            
-          'DEN': {'list':[],
-       '1': {'FIL':98,  'D_OUT': 0, 'BN': False,  'INIT': 'glorot_uniform' },
+          'DEN': {'list':['1'],
+       '1': {'FIL':72,  'D_OUT': 0, 'BN': False,  'INIT': 'glorot_uniform' },
        '2': {'FIL':48,  'D_OUT': 0, 'BN': False,  'INIT': 'glorot_uniform'},
        '3': {'FIL':16,  'D_OUT': 0, 'BN': False,  'INIT': 'glorot_uniform'}
                  },
           'OTHERS':{'list': ['1'],
-                    '1': {'LR': 0.0003, 'EPOCHS':10, 'WINDOW_LEN': 24, 'OUT_SIZE': 3,
+                    '1': {'LR': 0.0003, 'EPOCHS':300, 'WINDOW_LEN': 24, 'OUT_SIZE': 3,
                           'BATCH_SIZE' : 32, 'PERIOD': 16 }
                    }
           }
 
-mm.VARS_EX = {'CON' :{'1': {'KER': [8,6],
-                            'D_OUT': [0.3,0.6]
+mm.VARS_EX = {'CON' :{'1': {'FIL': [48,84,164],
+                            'D_OUT': [0,0.6]
                            },
-                      '2': {'KER': [8,2],
-                            'D_OUT': [0.5,0.8]
+                      '2': {'FIL': [32,64],
+                            'D_OUT': [0,0.6]
                            }
                      },
-              'LST' :{'1': {'FIL': [12,24]
+              'LST' :{'1': {'FIL': [48,128],
+                            'D_OUT': [0,0.3]
                            }
                      },
-              'DEN' :{},
-              'OTHERS':{'1':{'LR': [0.005,0.01]}}
+              'DEN' :{'1': {'FIL': [48,96],
+                            'D_OUT': [0,0.5]
+                           }
+                     },
+              'OTHERS':{'1':{'LR': [0.01, 0.005,0.001]
+                            }
+                       }
              }
 
 mm.CREATE_DIR()
@@ -598,3 +605,6 @@ mm.WRITE_CONSTANTS()
 mm.dict_UPDATE()
 mm.CREATE_REC_VAR()
 mm.GRID_TRAIN()
+
+with open('keyz.pkl', 'wb') as f:
+    pickle.dump(mm.keyz, f)
