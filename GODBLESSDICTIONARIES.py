@@ -418,7 +418,7 @@ class MODELL(helpful):
             if other_KEY not in (self.VARS_EX['OTHERS']['1'].keys()):
                 key_CONST = key_CONST + other_KEY + ': ' + str(self.dict['OTHERS']['1'][other_KEY]) + '\n'
         self.key_CONST = key_CONST
-        save_NAME_CONST = os.path.join(self.save_DIR, CONSTANT_HyperParameters+".txt")         
+        save_NAME_CONST = os.path.join(self.save_DIR, 'CONSTANT_HyperParameters'+".txt")         
 
         text_file = open(save_NAME_CONST , 'w')
         text_file.write(self.key_CONST)
