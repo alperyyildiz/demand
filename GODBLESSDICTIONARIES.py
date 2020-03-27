@@ -10,7 +10,6 @@ import types
 import math
 import keras
 import pickle
-from numba import cuda
 from datetime import datetime
 from hyperopt import fmin, tpe, hp, STATUS_OK, base,Trials
 from scipy import misc
