@@ -329,7 +329,7 @@ class MODELL(helpful):
     #EXPERIMENT DATE AND START TIME
     def CREATE_DIR(self):
         first_Con = True
-        SAVE_DIR = 'artifacts/'
+        SAVE_DIR = '/artifacts/'
 
         for con in range(len(self.dict['CON']['list'])):
             if first_Con:
