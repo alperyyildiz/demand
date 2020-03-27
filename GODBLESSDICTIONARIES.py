@@ -1,9 +1,10 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
-import tensorflow as tf
-import matplotlib.pyplot as plt
-import numpy as np
+
+
 import os
-import os.path
+import tensorflow as tf
+import numpy as np
+import matplotlib.pyplot as plt
 import time
 import pandas as pd
 import sys
@@ -11,6 +12,7 @@ import types
 import math
 import keras
 import pickle
+from numba import cuda
 from datetime import datetime
 from hyperopt import fmin, tpe, hp, STATUS_OK, base,Trials
 from scipy import misc
@@ -22,7 +24,7 @@ from sklearn import preprocessing
 from hyperopt import fmin, tpe, hp, STATUS_OK, base,Trials
 
 tf.keras.backend.set_floatx('float32')
-df = pd.read_excel('clean.xlsx').dropna()
+df = pd.read_excel('storage/clean.xlsx').dropna()
 print('HELLOOOOOO')
 
 
@@ -32,13 +34,13 @@ class helpful:
         windowlength = self.dict['OTHERS']['1']['WINDOW_LEN']
         outsize = self.dict['OTHERS']['1']['OUT_SIZE']
         arr = np.asarray(self.data['sales'])
-        vv =pd.read_csv('vix.csv',sep=',')
+        vv =pd.read_csv('storage/vix.csv',sep=',')
 
         vix = np.array(vv['Şimdi'])
         for i in range(len(vix)):
             vix[i] = float(vix[i].replace(',','.'))
 
-        dol =pd.read_csv('dollar.csv',sep=',')
+        dol =pd.read_csv('storage/dollar.csv',sep=',')
         dollars = np.array(dol['Şimdi'])
         for i in range(len(dollars)):
             dollars[i] = float(dollars[i].replace(',','.'))
@@ -177,7 +179,6 @@ class helpful:
         testpred = self.scaler.inverse_transform(model_out_conc.numpy())
         return real, testpred, lossz
 
-    
     def trainingz(self):
         current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
         train_log_dir = 'A/logs/gradient_tape/' + current_time + '/train'
@@ -203,15 +204,17 @@ class helpful:
                 self.valid_step(data_v)
             with valid_summary_writer.as_default():
                 tf.summary.scalar('loss_metric_valid', self.loss_metric_valid.result(), step=epoch)
-            
 
-            
+
+
             template = 'Sec : {} \n Epoch {} ---- Loss: {}  ----  Val_Loss: {}'
             #tf.print('Epoch', epoch, ': Time', time.time()-start, ': loss', self.loss_metric.result(), ': valid_loss', self.loss_metric_valid.result())
             self.hist.append(self.loss_metric.result())
             self.hist_valid.append(self.loss_metric_valid.result())
             self.loss_metric.reset_states()
             self.loss_metric_valid.reset_states()
+            self.loss_metric_test.reset_states()
+
 
 class MODELL(helpful):
     def __init__(self):
@@ -231,7 +234,7 @@ class MODELL(helpful):
         self.loss_metric_test = tf.keras.metrics.Mean(name='loss_metric_test')
         self.checkpoints = {}
         self.firsttime = True
-        self.data = pd.read_excel('clean.xlsx').dropna()
+        self.data = pd.read_excel('storage/clean.xlsx').dropna()
         self.scaler = StandardScaler()
         self.FIRST_ITER = True
         self.optimizer = tf.keras.optimizers.Adam()
@@ -251,6 +254,7 @@ class MODELL(helpful):
     #VALID ITERATION FOR MINI BATCH TRAIN
     @tf.function
     def valid_step(self,data_v):
+        
         inp_train_v,real_out_v = data_v
         model_out_v = self.modell(inp_train_v,training=False)
         loss_value_v = self.loss_mse(model_out_v, real_out_v)
@@ -305,11 +309,15 @@ class MODELL(helpful):
                 x1 = self.LSTM_block(key,inp)
             else:
                 x1 = self.LSTM_block(key,x1)
-        LAST_LS_LAYER = self.dict['LST']['list'][-1]
-        if layer!=0 and self.dict['LST'][LAST_LS_LAYER]['SEQ']==True:
-            x = tf.keras.layers.Flatten()(x1)
+        if len(list(self.dict['LST']['list']))>0:
+            LAST_LS_LAYER = self.dict['LST']['list'][-1]
+            if layer!=0 and self.dict['LST'][LAST_LS_LAYER]['SEQ']==True:
+                x = tf.keras.layers.Flatten()(x1)
+        elif layer==0:
+            pass
         else:
-            flat = True
+            x = tf.keras.layers.Flatten()(x1)
+
         for key in self.dict['DEN']['list']:
             if layer == 0:
                 layer = layer + 1
@@ -329,7 +337,7 @@ class MODELL(helpful):
     #EXPERIMENT DATE AND START TIME
     def CREATE_DIR(self):
         first_Con = True
-        SAVE_DIR = '/artifacts/'
+        SAVE_DIR = 'storage/'
 
         for con in range(len(self.dict['CON']['list'])):
             if first_Con:
@@ -411,19 +419,20 @@ class MODELL(helpful):
                             key_CONST = key_CONST[:-3] + ' \n '
                             key_CONST = key_CONST + Layer_TYP[0] + LAYER_NUM + ': '
                             for var in list(self.dict[Layer_TYP][LAYER_NUM].keys()):
-                                if var not in list(self.VARS_EX[Layer_TYP][LAYER_NUM]):
+                                if Layer_TYP in self.VARS_EX.keys() and LAYER_NUM in self.VARS_EX[Layer_TYP].keys():
+                                    if var not in list(self.VARS_EX[Layer_TYP][LAYER_NUM]):
+                                        key_CONST  = key_CONST + var + ': ' + str(self.dict[Layer_TYP][LAYER_NUM][var]) + ' -- '
+                                else:
                                     key_CONST  = key_CONST + var + ': ' + str(self.dict[Layer_TYP][LAYER_NUM][var]) + ' -- '
-        key_CONST = key_CONST[:-3]  + '\n'
+        key_CONST = key_CONST + '\n'
         for other_KEY in self.dict['OTHERS']['1']:
             if other_KEY not in (self.VARS_EX['OTHERS']['1'].keys()):
                 key_CONST = key_CONST + other_KEY + ': ' + str(self.dict['OTHERS']['1'][other_KEY]) + '\n'
         self.key_CONST = key_CONST
-        save_NAME_CONST = os.path.join(self.save_DIR, 'CONSTANT_HyperParameters'+".txt")         
-
+        save_NAME_CONST = self.save_DIR + '/CONSTANT_HyperParameters.txt'
         text_file = open(save_NAME_CONST , 'w')
         text_file.write(self.key_CONST)
         text_file.close()
-    
 
     #SAVES HIST AND PRED PLOTS
     def SAVE_PLOTS(self):
@@ -452,31 +461,32 @@ class MODELL(helpful):
                     
                     
     #RECURSIVE LOOP FOR TRAINING
+    #RECURSIVE LOOP FOR TRAINING
     def GRID_TRAIN(self,LOOP_NUM = 0):
-        if LOOP_NUM < self.num_of_rec - 1:
+        if LOOP_NUM < self.num_of_rec -1 :
             for i in range(len(self.REC_LOOP_PARAMS[LOOP_NUM])):
                 KEY_LIST = self.REC_LOOP_KEYS[LOOP_NUM]
-                
+
                 self.dict[KEY_LIST[0]][KEY_LIST[1]][KEY_LIST[2]] = self.REC_LOOP_PARAMS[LOOP_NUM][i]
                 self.GRID_TRAIN(LOOP_NUM = LOOP_NUM + 1)
         else:
+
             for i in range(len(self.REC_LOOP_PARAMS[LOOP_NUM])):
                 KEY_LIST = self.REC_LOOP_KEYS[LOOP_NUM]
                 self.dict[KEY_LIST[0]][KEY_LIST[1]][KEY_LIST[2]] = self.REC_LOOP_PARAMS[LOOP_NUM][i]
-                self.CREATE_MODEL()
-                
+                self.CREATE_MODEL()                
                 
     #CREATE VARIABLES TO CREATE RECURSIVE TRAINING LOOP
     def CREATE_REC_VAR(self):
+        self.num_of_rec = 0
         self.REC_LOOP_KEYS = list()
         self.REC_LOOP_PARAMS = list()
         for keys in list(self.VARS_EX.keys()):
-            print(keys)
             for LAY_NUM in list(self.VARS_EX[keys].keys()):
                 for PARAM in  list(self.VARS_EX[keys][LAY_NUM].keys()):
                     self.REC_LOOP_KEYS.append([keys,LAY_NUM,PARAM])
                     self.REC_LOOP_PARAMS.append(self.VARS_EX[keys][LAY_NUM][PARAM])
-        self.num_of_rec = len(self.REC_LOOP_KEYS)
+                    self.num_of_rec = 1 + self.num_of_rec
         
     def CREATE_DATA(self):
         train_input, test_input, train_out, test_out = mm.preprocess(split = 216)
@@ -487,6 +497,9 @@ class MODELL(helpful):
         try:
             cuda.select_device(0)
             cuda.close()
+        except:
+            pass
+        try:
             tf.keras.backend.clear_session()
         except:
             pass
@@ -552,7 +565,7 @@ class MODELL(helpful):
                     save_NAME_PRED = save_NAME[:-3] + save_VALUES
                     save_NAME = save_NAME[:-3] + save_VALUES
 
-        key_VAR = key_VAR[4:]
+        key_VAR = key_VAR[3:]
         save_NAME = save_NAME[2:-1]
         save_NAME_PRED = 'PRED-' + save_NAME_PRED[:-1]
         return key_VAR, save_NAME, save_NAME_PRED
@@ -560,53 +573,3 @@ class MODELL(helpful):
             
             
 mm = MODELL()
-mm.dict = {'CON' : {'list': ['1','2'],
-        '1': {'FIL':84, 'KER': 8, 'D_OUT': 0, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
-        '2': {'FIL':48, 'KER': 4, 'D_OUT': 0, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
-        '3': {'FIL':48, 'KER': 2, 'D_OUT': 0, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 }
-                   },
-           
-          'LST' : {'list':['1'],
-       '1': {'FIL':64, 'SEQ': True, 'D_OUT': 0, 'BN': False,  'INIT': 'glorot_uniform' },
-       '2': {'FIL':24,  'SEQ': True, 'D_OUT': 0, 'BN': False,  'INIT': 'glorot_uniform'}
-                  },
-           
-          'DEN': {'list':['1'],
-       '1': {'FIL':72,  'D_OUT': 0, 'BN': False,  'INIT': 'glorot_uniform' },
-       '2': {'FIL':48,  'D_OUT': 0, 'BN': False,  'INIT': 'glorot_uniform'},
-       '3': {'FIL':16,  'D_OUT': 0, 'BN': False,  'INIT': 'glorot_uniform'}
-                 },
-          'OTHERS':{'list': ['1'],
-                    '1': {'LR': 0.0003, 'EPOCHS':300, 'WINDOW_LEN': 24, 'OUT_SIZE': 3,
-                          'BATCH_SIZE' : 32, 'PERIOD': 16 }
-                   }
-          }
-
-mm.VARS_EX = {'CON' :{'1': {'FIL': [48,96,164],
-                            'D_OUT': [0,0.6]
-                           },
-                      '2': {'FIL': [48,64]
-                           }
-                     },
-              'LST' :{'1': {'FIL': [84,128],
-                            'D_OUT': [0,0.5]
-                           }
-                     },
-              'DEN' :{'1': {'FIL': [48,96],
-                            'D_OUT': [0,0.5]
-                           }
-                     },
-              'OTHERS':{'1':{'LR': [0.01, 0.005,0.001]
-                            }
-                       }
-             }
-
-
-mm.CREATE_DIR()
-mm.WRITE_CONSTANTS()  
-mm.dict_UPDATE()
-mm.CREATE_REC_VAR()
-mm.GRID_TRAIN()
-
-with open('keyz.pkl', 'wb') as f:
-    pickle.dump(mm.keyz, f)
