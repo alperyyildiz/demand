@@ -1,10 +1,8 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
-
-
-import os
 import tensorflow as tf
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import os
 import time
 import pandas as pd
 import sys
@@ -179,6 +177,7 @@ class helpful:
         testpred = self.scaler.inverse_transform(model_out_conc.numpy())
         return real, testpred, lossz
 
+    
     def trainingz(self):
         current_time = datetime.now().strftime("%Y%m%d-%H%M%S")
         train_log_dir = 'A/logs/gradient_tape/' + current_time + '/train'
@@ -204,17 +203,15 @@ class helpful:
                 self.valid_step(data_v)
             with valid_summary_writer.as_default():
                 tf.summary.scalar('loss_metric_valid', self.loss_metric_valid.result(), step=epoch)
+            
 
-
-
+            
             template = 'Sec : {} \n Epoch {} ---- Loss: {}  ----  Val_Loss: {}'
             #tf.print('Epoch', epoch, ': Time', time.time()-start, ': loss', self.loss_metric.result(), ': valid_loss', self.loss_metric_valid.result())
             self.hist.append(self.loss_metric.result())
             self.hist_valid.append(self.loss_metric_valid.result())
             self.loss_metric.reset_states()
             self.loss_metric_valid.reset_states()
-            self.loss_metric_test.reset_states()
-
 
 class MODELL(helpful):
     def __init__(self):
@@ -240,7 +237,7 @@ class MODELL(helpful):
         self.optimizer = tf.keras.optimizers.Adam()
         self.keyz = list()
     #TRAIN ITERATION FOR MINI BATCH TRAIN
-    @tf.function
+    #@tf.function
     def train_step(self,data):
         inp,real_out = data
         with tf.GradientTape() as lstm_tape:
@@ -252,9 +249,8 @@ class MODELL(helpful):
         return self.loss_metric(loss)
 
     #VALID ITERATION FOR MINI BATCH TRAIN
-    @tf.function
+    #@tf.function
     def valid_step(self,data_v):
-        
         inp_train_v,real_out_v = data_v
         model_out_v = self.modell(inp_train_v,training=False)
         loss_value_v = self.loss_mse(model_out_v, real_out_v)
@@ -296,27 +292,28 @@ class MODELL(helpful):
     def model_parallel(self):
         inp = tf.keras.layers.Input(shape=(self.windowlength,self.featuresize))
         layer = 0
+        flat = True
         for key in self.dict['CON']['list']:
             if layer == 0:
-                x1 = self.CONV1D_block(key,inp)
+                x = self.CONV1D_block(key,inp)
                 layer = layer + 1
             else:
-                x1 = self.CONV1D_block(key,x1)
+                x = self.CONV1D_block(key,x)
 
         for key in self.dict['LST']['list']:
             if layer == 0:
                 layer = layer + 1
-                x1 = self.LSTM_block(key,inp)
+                x = self.LSTM_block(key,inp)
             else:
-                x1 = self.LSTM_block(key,x1)
-        if len(list(self.dict['LST']['list']))>0:
-            LAST_LS_LAYER = self.dict['LST']['list'][-1]
-            if layer!=0 and self.dict['LST'][LAST_LS_LAYER]['SEQ']==True:
-                x = tf.keras.layers.Flatten()(x1)
-        elif layer==0:
-            pass
-        else:
-            x = tf.keras.layers.Flatten()(x1)
+                x = self.LSTM_block(key,x)
+
+        if len(self.dict['LST']['list'])>0:
+            if self.dict['LST'][self.dict['LST']['list'][-1]]['SEQ']==False:
+                flat = False
+
+        if layer != 0 and flat == True:
+            x = tf.keras.layers.Flatten()(x)
+
 
         for key in self.dict['DEN']['list']:
             if layer == 0:
@@ -566,10 +563,56 @@ class MODELL(helpful):
                     save_NAME = save_NAME[:-3] + save_VALUES
 
         key_VAR = key_VAR[3:]
-        save_NAME = save_NAME[2:-1]
+        save_NAME = save_NAME[:-1]
         save_NAME_PRED = 'PRED-' + save_NAME_PRED[:-1]
         return key_VAR, save_NAME, save_NAME_PRED
     
             
-            
 mm = MODELL()
+mm.dict = {'CON' : {'list': ['1','2'],
+        '1': {'FIL':128, 'KER': 8, 'D_OUT': 0.5, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
+        '2': {'FIL':48, 'KER': 8, 'D_OUT': 0.5, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
+        '3': {'FIL':48, 'KER': 2, 'D_OUT': 0, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 }
+                   },
+           
+          'LST' : {'list':[],
+       '1': {'FIL':64, 'SEQ': True, 'D_OUT': 0, 'BN': False,  'INIT': 'glorot_uniform' },
+       '2': {'FIL':24,  'SEQ': True, 'D_OUT': 0, 'BN': False,  'INIT': 'glorot_uniform'}
+                  },
+           
+          'DEN': {'list':['1',],
+       '1': {'FIL':72,  'D_OUT': 0, 'BN': False,  'INIT': 'glorot_uniform' },
+       '2': {'FIL':48,  'D_OUT': 0, 'BN': False,  'INIT': 'glorot_uniform'},
+       '3': {'FIL':16,  'D_OUT': 0, 'BN': False,  'INIT': 'glorot_uniform'}
+                 },
+          'OTHERS':{'list': ['1'],
+                    '1': {'LR': 0.0003, 'EPOCHS':3000, 'WINDOW_LEN': 24, 'OUT_SIZE': 3,
+                          'BATCH_SIZE' : 16, 'PERIOD': 16 }
+                   }
+          }
+
+mm.VARS_EX = {'CON' :{'1': {
+                            'KER': [4,8,16]
+                           }
+                     },
+              
+              'LST':{},
+              
+              'DEN' :{'1': {
+                            'D_OUT': [0.2,0.35,0.5]
+                           }
+                     },
+              'OTHERS':{'1':{
+                             'LR': [8e-5,3e-5]
+                            }
+                       }
+             }
+
+mm.CREATE_DIR()
+mm.WRITE_CONSTANTS()  
+mm.dict_UPDATE()
+mm.CREATE_REC_VAR()
+mm.GRID_TRAIN()
+
+with open('keyz.pkl', 'wb') as f:
+    pickle.dump(mm.keyz, f)
