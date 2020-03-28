@@ -570,8 +570,8 @@ class MODELL(helpful):
             
 mm = MODELL()
 mm.dict = {'CON' : {'list': ['1','2'],
-        '1': {'FIL':128, 'KER': 8, 'D_OUT': 0.5, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
-        '2': {'FIL':48, 'KER': 8, 'D_OUT': 0.5, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
+        '1': {'FIL':128, 'KER': 8, 'D_OUT': 0.3, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
+        '2': {'FIL':48, 'KER': 8, 'D_OUT': 0.3, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 },
         '3': {'FIL':48, 'KER': 2, 'D_OUT': 0, 'BN': False, 'INIT':'glorot_uniform', 'REG': 0.01 }
                    },
            
@@ -607,12 +607,3 @@ mm.VARS_EX = {'CON' :{'1': {
                             }
                        }
              }
-
-mm.CREATE_DIR()
-mm.WRITE_CONSTANTS()  
-mm.dict_UPDATE()
-mm.CREATE_REC_VAR()
-mm.GRID_TRAIN()
-
-with open('keyz.pkl', 'wb') as f:
-    pickle.dump(mm.keyz, f)
